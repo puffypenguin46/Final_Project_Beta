@@ -1,20 +1,41 @@
-// Maze game 
-// Your Name
-// Date
+// 3d Maze game
+// Maram hani
+// May 26
 //
 // Extra for Experts:
 // - describe what you did to take this project "above and beyond"
+// - used a 3d array to make a map that the player can navigate through in 3d
+// - learned WEBGL to make the maze look like it was made using raycasting
+
+
+
+
+// Repo- push to origin isn't working for this project for some reason so the past week's work will be listed here
+
+
+// 6/10/2024
+// - learned how to make object disapear when hit
+
+
+// 6/11/2024
+// - work on looking how to apply wall collision to the ball
+
+
+// 6/12/2024
+// - added ball collison, tmr need to combine both funtions together so it isnt checking two things at the same time
+// - add text and instructions
+
+
+// 6/14/2024
+
+
+
+
+
+
 
 
 // Walker OOP Demo
-
-//ignore
-// function preload() {
-//   hallOne = loadImage('hallway 1.png');S
-//   hallTwo = loadImage('hall 2.png');
-//   hallThree = loadImage('hall 3.png');
-// }
-// ------------------------------------------
 
 
 // create the map layout using a 2D ARRAY
@@ -24,20 +45,25 @@
 // p = player starting position
 // X = wall (rectangle higher than player)
 const GAME_MAP = [
-  "XXXXXXXXXXXXXXXXXXXXXXXX XXXXXXXXX",
-  "X           e                    X",
-  "X                       p        X",
-  "X                                X",
-  "X               C                X",
-  "X                                X",
-  "X                                X",
-  "X                                X", 
-  "X                                X",
-  "X                                X",
-  "X                                X",
-  "X                                X",
   "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+  "X            X          X p X    X",
+  "X XXXXXXXX   X  XXXXXXXXX   X    X",
+  "X        X                  X    X",
+  "X X  XXXXX   X  XXXXXXXXXXXX     X",
+  "X            X                   X",
+  "XXXXXXXX X   XXXXXXX   XXXXXX    X",
+  "X        X   X    X   X          X",
+  "X    X   X   X    X   X   XXXXXXXX",
+  "X    X       X        X          X",
+  "X  XXXXXXXXXXXXXXXXXXXXXXXXXXXX  X",
+  "X                      X         X",
+  "XXXXXXXXXXXXXXXXXXXXXXXX   XXXXXXX",
+  "                                  ",
+  "                         e        ",
 ];
+
+
+
 
 // global
 const GRID_SIZE = 150;
@@ -48,16 +74,24 @@ const MOUSE_SENSITIVITY = 0.0001;
 const CAM_X = 100;
 const CAM_Y = -75;
 const CAM_Z = 50;
-
+ 
 let wallTexture;
+let trophy;
 let walls = [];
 let player;
 let enemies = [];
 let icecream = [];
 let isStopped = true;
-let state = "show"; 
+let state = "show";
+
 
 // preload files for sounds and textures
+
+
+function preload() {
+  wallTexture = loadImage("walltexture.jpg");
+  trophy = loadImage("trophy.webp");
+}
 
 
 function setup() {
@@ -65,6 +99,9 @@ function setup() {
   // this isnt true raycasting but copies the feel of raycasting
   createCanvas(920, 600, WEBGL);
   cursor(CROSS);
+
+
+
 
   //game layout
   //looping through arrays to look up what tile object is at that every position
@@ -74,8 +111,8 @@ function setup() {
       //use GRID_SIZE const to create each tile as a square thats 150 x 150 pixels
       let worldX = (x - GAME_MAP[z].length / 2) * GRID_SIZE;
       let worldZ = (z - GAME_MAP.length / 2) * GRID_SIZE;
-      // switch is like an "else if" statement but better to use with 3 or more options 
-      // "case" holds the options 
+      // switch is like an "else if" statement but better to use with 3 or more options
+      // "case" holds the options
       // basically checking the grid for symbols and initializing the right class for each
       switch (tile) {
         case "p":
@@ -95,31 +132,61 @@ function setup() {
   }
 }
 
+
+
+
 function draw() {
   background("blue");
+
+
+
 
   // basic lighting using the 3d p5js progra,
   ambientLight(150);
   directionalLight(180, 180, 180, 0, 0, -1);
 
+
+
+
   // draw interior
   drawFloor();
-  //loop through each wall so we can move through it 
-  walls.forEach((wall) => wall.display());
+  //loop through each wall so we can move through it
 
+
+  if (state === "show") {
+    text("3D MAZE GAME");
+    text("use uppercase arrow and mouse to move");
+  }
+ 
   //draw player and enemies
   player.turnTowardsMouse();
   player.moveForward();
   player.updateCamera();
 
+
+
+
+
+
+
+
+  // if (state === "show") {
+  //   icecream.forEach((iccone) => iccone.display());
+  // }
+  walls.forEach((wall) => wall.display());
+
+
   if (state === "show") {
-    icecream.forEach((iccone) => iccone.display());
+    enemies.forEach((enemy) => enemy.display());
   }
+
+
+
 
 }
 
-// 
-// controls so player can move around 
+
+// controls so player can move around
 class Player {
   constructor(x, z) {
     this.x = x;
@@ -129,6 +196,9 @@ class Player {
     this.isRunning = false;
   }
 
+
+
+
   moveForward() {
     if (!this.isMovingForward) {
       return;
@@ -136,16 +206,22 @@ class Player {
     let speed = this.isRunning ? RUN_SPEED : WALK_SPEED;
     let newX = this.x + Math.sin(this.direction) * speed;
     let newZ = this.z + Math.cos(this.direction) * speed;
+
+
+
+
+    // ! means boolean, if ___ means true  
     if (!this.checkCollision(newX, newZ)) {
       this.x = newX;
       this.z = newZ;
     }
-    if (!this.checkBallCollision(newX, newZ)) {
-      state === "void";
-    }
+
+
   }
 
-  // stop moving if encountering a wall 
+
+
+
   checkCollision(newX, newZ) {
     for (let wall of walls) {
       if (
@@ -157,30 +233,28 @@ class Player {
         return true;
       }
     }
-    return false;
-  }
-
-  checkBallCollision(newX, newZ) {
-    for (let iccone of icecream) {
-      return true;
+    for (let enemy of enemies) {
       if (
-        newX > iccone.x - (iccone.s / 2 + PERSONAL_SPACE) &&
-        newX < iccone.x + (iccone.s / 2 + PERSONAL_SPACE) &&
-        newZ > iccone.z - (iccone.s / 2 + PERSONAL_SPACE) &&
-        newZ < iccone.z + (iccone.s / 2 + PERSONAL_SPACE)
+        newX > enemy.x - (enemy.r / 2 + PERSONAL_SPACE) &&
+        newX < enemy.x + (enemy.r / 2 + PERSONAL_SPACE) &&
+        newZ > enemy.z - (enemy.r / 2 + PERSONAL_SPACE) &&
+        newZ < enemy.z + (enemy.r / 2 + PERSONAL_SPACE)
       ) {
-        console.log;
         return true;
       }
     }
     return false;
   }
 
+
   turnTowardsMouse() {
-    // check if mouse is outside the canvas and ask it to return early if it is 
+    // check if mouse is outside the canvas and ask it to return early if it is
     if (mouseX < 0 || mouseX > width || mouseY < 0 || mouseY > height) {
       return;
     }
+
+
+
 
     // Only turn if mouse is on edge of canvas.
     const noTurnZoneStart = (width * 2) / 5;
@@ -191,6 +265,9 @@ class Player {
     }
   }
 
+
+
+
   updateCamera() {
     let camX = this.x + Math.sin(this.direction) * CAM_X;
     let camZ = this.z + Math.cos(this.direction) * CAM_Z;
@@ -199,6 +276,9 @@ class Player {
     camera(camX, CAM_Y, camZ, lookX, CAM_Y, lookZ, 0, 1, 0);
     }
   }
+
+
+
 
 // if key is down move
 function keyPressed() {
@@ -212,6 +292,9 @@ function keyPressed() {
   }
 }
 
+
+
+
 // if key is up stop
 function keyReleased() {
   switch (keyCode) {
@@ -224,6 +307,9 @@ function keyReleased() {
   }
 }
 
+
+
+
 class Wall {
   // find out where to display wall
   constructor(x, z, w, h, d) {
@@ -234,11 +320,14 @@ class Wall {
     this.d = d;
   }
 
+
+
+
   //draw the wall as a box in 3d
   display() {
     push();
+    texture(wallTexture);
     translate(this.x, -this.h / 2, this.z);
-    fill("black");
     box(this.w, this.h, this.d);
     pop();
   }
@@ -257,6 +346,9 @@ function drawFloor() {
   plane(width * 10, height * 10);
   pop();
 }
+
+
+
 
 class iceCreamCone {
   constructor(x, z) {
@@ -277,22 +369,28 @@ class iceCreamCone {
 }
 
 
+
+
+ 
 class Enemy {
   constructor(x, z) {
     // no y position since everything is on the ground
     this.x = x;
     this.z = z;
-    //radius 
+    //radius
     this.r = 50;
   }
-
   display() {
+    //search up how this push and pop thing works
     push();
+    // make a seamless ball
+    texture(trophy);
     noStroke();
-    //move origin so enemy spawn in the right postion
+    //move origin so enemy spawn in the right position
     translate(this.x, -this.r, this.z);
-    fill("pink");
     sphere(this.r);
     pop();
   }
 }
+
+
