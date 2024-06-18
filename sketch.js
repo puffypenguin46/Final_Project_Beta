@@ -90,7 +90,7 @@ let state = "show";
 
 function preload() {
   wallTexture = loadImage("walltexture.jpg");
-  trophy = loadImage("trophy.webp");
+  trophy = loadImage("trophy.jpg");
 }
 
 
